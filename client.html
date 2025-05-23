@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Coffee Order Tracker</title>
+  <!-- Socket.IO 클라이언트 라이브러리 -->
+  <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>커피 주문 상태 실시간 확인</h1>
+  <div>
+    <label>
+      주문 ID: <input id="orderId" placeholder="생성된 orderId 입력" />
+    </label>
+    <button id="joinBtn">구독 시작</button>
+  </div>
+  <pre id="log" style="background:#f0f0f0; padding:10px;"></pre>
+
+  <script>
+    // 서버 주소(필요시 192.168.55.163:5000 으로 변경)
+    const socket = io('http://127.0.0.1:5000');
+
+    const logEl = document.getElementById('log');
+    const log = msg => {
+      logEl.textContent += msg + '\n';
+    };
+
+    document.getElementById('joinBtn').onclick = () => {
+      const oid = document.getElementById('orderId').value.trim();
+      if (!oid) return alert('orderId를 입력하세요');
+      socket.emit('join', { orderId: oid });
+      log(`🌟 구독 시작: ${oid}`);
+    };
+
+    socket.on('order_status', data => {
+      log(`🔔 상태 업데이트: 주문 ${data.orderId} → ${data.status}`);
+    });
+  </script>
+</body>
+</html>
